@@ -1,0 +1,20 @@
+module.exports = (sequelize, DataTypes) => {
+  const Image = sequelize.define(
+    "Image",
+    {
+      src: {
+        type: DataTypes.STRING(200),
+        allowNull: false,
+      },
+    },
+    {
+      charset: "utf8",
+      collate: "utf8_general_ci",
+    }
+  );
+  //관계 설정
+  Image.associate = (db) => {
+    db.Image.belongTo(db.Post);
+  };
+  return Image;
+};
