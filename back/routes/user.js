@@ -1,5 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const passport = require("passport");
+
 const { User } = require("../models");
 const router = express.Router();
 
@@ -12,8 +14,8 @@ router.post("/", async (req, res, next) => {
       },
     });
 
-    if(exUser) {
-      return res.status(403).send('이미 사용중인 아이디입니다.')
+    if (exUser) {
+      return res.status(403).send("이미 사용중인 아이디입니다.");
     }
     await User.create({
       email: req.body.email,
@@ -25,6 +27,32 @@ router.post("/", async (req, res, next) => {
     console.error(error);
     next(error); // status 500
   }
+});
+
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, message) => {
+    if (err) {
+      console.error(err);
+      return next(err);
+    }
+    if (message) {
+      return res.status(401).json(message.reason);
+    }
+    return req.login(user, async (loginError) => {
+      if (loginError) {
+        //passport쪽 에러
+        console.error(loginError);
+        return next(loginError);
+      }
+      return res.json(user);
+    });
+  })(req, res, next);
+});
+
+router.post("/logout", (req, res, next) => {
+  req.logOut();
+  req.session.destroy(); // 세션에 담긴 사용자 정보 삭제
+  res.send("ok");
 });
 
 module.exports = router;
