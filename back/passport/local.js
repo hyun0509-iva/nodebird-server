@@ -18,7 +18,7 @@ module.exports = () => {
             return done(null, false, { reason: "존재하지 않는 사용자입니다." });
             // done(server error, success data, error.message)
           }
-          const result = bcrypt.compare(passport, user.password);
+          const result = await bcrypt.compare(passport, user.password);
           if (result) {
             //비밀번호가 일치하면 사용자 정보 전달
             return done(null, user); //req.user 객체로 전달됨

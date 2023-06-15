@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 
-const { User } = require("../models");
+const { User, Post  } = require("../models");
 const router = express.Router();
 
 router.post("/", async (req, res, next) => {
@@ -44,15 +44,40 @@ router.post("/login", (req, res, next) => {
         console.error(loginError);
         return next(loginError);
       }
-      return res.json(user);
+
+      // 사용자 정보 가공하기.
+      const fullUserWithoutPassword = await User.findOne({
+        where: { id: user.id },
+        // attributes: ['id', 'nickname', 'email'], //포함할 User 필드
+        attributes: {
+          exclude: ['password'] //제외시킬 User 필드
+        },
+        include: [
+          {
+            model: Post, 
+            //hasMany라서 이런식으로 작성하면 프론트측에서 복수형으로 me.Posts가 됨
+          },
+          {
+            model: User,
+            as: "Followings",
+          },
+          {
+            model: User,
+            as: "Followers",
+          },
+        ],
+      });
+      return res.status(200).json(fullUserWithoutPassword);
     });
   })(req, res, next);
 });
 
-router.post("/logout", (req, res, next) => {
-  req.logOut();
-  req.session.destroy(); // 세션에 담긴 사용자 정보 삭제
-  res.send("ok");
-});
+  router.post('/logout', (req, res) => {
+    req.logout((err) => {
+      if (err) { return next(err); }
+      req.session.destroy();
+      res.send("ok");
+    });
+  });
 
 module.exports = router;
