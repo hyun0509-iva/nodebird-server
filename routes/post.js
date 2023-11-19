@@ -1,5 +1,5 @@
 const express = require("express");
-const { Post, Comment } = require("../models");
+const { Post, Comment, User, Image } = require("../models");
 const { isLoggedIn } = require("./auth");
 
 const router = express.Router();
@@ -11,7 +11,14 @@ router.post("/", isLoggedIn, async (req, res) => {
       content: req.body.content,
       UserId: req.user.id,
     });
-    res.status(201).json(post);
+
+    const fullPost = await Post.findOne({
+      where: { id: post.id },
+      include: [{ model: Image},{ model: Comment }, { model: User },
+      ],
+    });
+
+    res.status(201).json(fullPost);
   } catch (error) {
     console.error(error);
     next(error);
@@ -32,7 +39,7 @@ router.delete("/", (req, res) => {
 router.post("/:postId/comment", isLoggedIn, async (req, res) => {
   try {
     const post = await Post.findOne({ where: { id: req.params.postId } });
-    if(!post) {
+    if (!post) {
       return res.status(403).send("존재하지 않는 게시글입니다.");
     }
     const comment = await Comment.create({

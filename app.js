@@ -21,7 +21,7 @@ db.sequelize
 passportConfig();
 
 app.use(cors({
-  origin: '*',
+  origin: 'http://localhost:3060',
   credentials: true
 }));
 app.use(express.json());
@@ -39,7 +39,7 @@ app.get("/api", (req, res) => {
   res.send("hello express");
 });
 
-app.use("/api/posts", postRouter);
+app.use("/api/post", postRouter);
 app.use("/api/user", userRouter);
 
 app.listen(3082, () => {
