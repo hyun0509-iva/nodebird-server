@@ -14,8 +14,7 @@ router.post("/", isLoggedIn, async (req, res) => {
 
     const fullPost = await Post.findOne({
       where: { id: post.id },
-      include: [{ model: Image},{ model: Comment }, { model: User },
-      ],
+      include: [{ model: Image }, { model: Comment }, { model: User }],
     });
 
     res.status(201).json(fullPost);
@@ -44,7 +43,8 @@ router.post("/:postId/comment", isLoggedIn, async (req, res) => {
     }
     const comment = await Comment.create({
       content: req.body.content,
-      PostId: req.params.postId,
+      PostId: parseInt(req.params.postId, 10),
+      UserId: req.user.id,
     });
     res.status(201).json(comment);
   } catch (error) {
